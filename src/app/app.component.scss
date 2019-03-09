@@ -1,0 +1,160 @@
+/* Header */
+
+
+#header-wrapper
+{
+    background: url(~/assets/images/banner.jpg) no-repeat center top;
+    background-size: cover;
+    position: relative;
+}
+
+#header-wrapper:before
+{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(60,50,70,0.5);
+}
+
+#header {
+    position: relative;
+    z-index: 1;
+}
+
+header
+{
+    margin-bottom: 3em;
+    position: relative;
+}
+
+header h2
+{
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+header .byline
+{
+    display: block;
+    margin: 1.50em 0em;
+    line-height: 2em;
+    font-weight: 200;
+    color: rgba(255,255,255,.8);
+}
+
+/* Banner */
+
+#banner
+{
+    overflow: hidden;
+    padding: 10em 0em;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+}
+
+#banner header h2
+{
+    text-transform: uppercase;
+    font-size: 3em;
+    color: #FFF;
+}
+
+#banner header .byline
+{
+    padding: 0em 5em;
+    font-size: 1.50em;
+}
+
+#banner .button
+{
+    margin-top: 1em;
+}
+
+/* Wrapper */
+
+#wrapper
+{
+    padding: 5em 0em 3em 0em;
+}
+
+#page
+{	
+    padding: 5em 0em 3em 0em;
+}
+
+/* Content */
+
+#content
+{
+}
+
+#content a img
+{
+    display: block;
+    width: 100%;
+    margin-bottom: 1.50em;
+    border-radius: 5px;
+}
+
+#content .main-title
+{
+    font-size: 3.00em;
+}
+
+#content .button
+{
+    margin-top: 2em;
+}
+
+/* Sidebar */
+
+#sidebar
+{
+}
+
+#sidebar h2
+{
+    margin-bottom: 1em;
+}
+
+#sidebar #box1
+{
+    margin-bottom: 3em;
+}
+
+#sidebar #box2 .button
+{
+    margin-top: 0;
+}
+
+
+
+/* Copyright */
+
+#copyright
+{
+    overflow: hidden;
+    padding: 3em 0em 6em 0em;
+    border-top: 1px solid #212124;
+    text-align: center;
+}
+
+#copyright p
+{
+    font-size: 1em;
+}
+
+#copyright a
+{
+    color: #949494;
+}
+
+#copyright a:hover
+{
+    text-decoration: none;
+}
