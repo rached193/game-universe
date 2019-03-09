@@ -7,3 +7,41 @@ body
 	font-size: 10pt;
 	color: #686868;
 }
+
+body, #skel-panels-pageWrapper
+{
+	background: #101214 url(~/assets/images/main-bg.png) repeat;
+}
+
+h1, h2, h3 {
+	margin: 0;
+	padding: 0;
+	font-weight: 300;
+	color: #CFCFCF;
+}
+
+h2
+{
+	letter-spacing: -1px;
+	font-size: 2.00em;
+}
+
+p, ol, ul
+{
+	margin-top: 1em;
+}
+
+p
+{
+}
+
+a
+{
+	text-decoration: underline;
+	color: #909090;
+}
+
+a:hover
+{
+	text-decoration: none;
+}
