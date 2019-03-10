@@ -1,21 +1,24 @@
 <form [formGroup]="competitionForm" (ngSubmit)="onSubmit()" novalidate>
 
-    <input formControlName="name">
-
-    <input formControlName="videogame">
-
-    
-  <select formControlName="region">
-    <option *ngFor="let region of regions" [value]="region">{{region}}</option>
-  </select>
-
+    <input formControlName="name" type="text"> <label>Competition Name</label>
+  <br/>
+  <select formControlName="videogame">
+    <option *ngFor="let videogame of videogames" [value]="videogame.id">{{videogame.name}}</option>
+  </select> <label>Videogame</label>
+  <br/>
   <select formControlName="platform">
-      <option *ngFor="let platform of platforms" [value]="platform">{{platform}}</option>
-    </select>
-
-  <input formControlName="mode">
-
-  <button type="submit" [disabled]="competitionForm.pristine">Save</button>
+    <option *ngFor="let platform of platforms" [value]="platform.id">{{platform.name}}</option>
+  </select> <label>Platform</label>
+  <br/>
+<select formControlName="region">
+    <option *ngFor="let region of regions" [value]="region.id">{{region.name}}</option>
+  </select> <label>Region</label>
+  <br/>
+  <select formControlName="mode">
+    <option *ngFor="let mode of modes" [value]="mode.id">{{mode.name}}</option>
+  </select> <label>Game Mode</label>
+  <br/>
   <button type="reset" (click)="revert()" [disabled]="competitionForm.pristine">Revert</button>
+  <button type="submit" [disabled]="competitionForm.pristine">Save</button>
 
 </form>
