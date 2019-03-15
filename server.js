@@ -7,6 +7,7 @@ const pg = require('pg');
 const app = express();
 const pool = new pg.Pool()
 
+console.log(process.env.DATABASE_URL);
 const dbString = process.env.DATABASE_URL;
 
 // Serve only the static files form the dist directory
