@@ -5,16 +5,21 @@ const pg = require('pg');
 
 
 const app = express();
-const pool = new pg.Pool()
-
-const dbString = process.env.DATABASE_URL;
+const pool = new pg.Pool({
+  user: 'ebiypfwrqgauhd',
+  host: 'ec2-54-247-70-127.eu-west-1.compute.amazonaws.com',
+  database: 'db52vg2qmaqvaj',
+  password: '450b56f7a62ec0fd1024d07d13e715c101082caf81878a9507b0657b58ebe6ac',
+  port: 5432,
+  ssl: true
+});
 
 // Serve only the static files form the dist directory
 app.use(express.static(__dirname + '/dist/game-universe'));
 
-const sharedPgClient = null;
+var sharedPgClient = null;
 
-pool.connect(dbString, function (err, client) {
+pool.connect(function (err, client) {
     if (err) {
         console.error("PG Connection Error")
     }
@@ -22,13 +27,12 @@ pool.connect(dbString, function (err, client) {
     sharedPgClient = client;
 });
 
-
 app.get("/addCompetitions", function defaultRoute(req, res) {
     var query = "SELECT * FROM Competitions.master_format";
 
     sharedPgClient.query(query, function (err, result) {
         console.log("Jobs Query Result Count: " + result.rows.length);
-        res.send(result)
+        res.send(result.rows)
     });
 });
 
