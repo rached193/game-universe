@@ -11,14 +11,27 @@
 
   form {
     background-color: #212124f5;
+    padding: 2em;
 
-  }
+    display: flex;
+    flex-direction: column;
 
+    label {
+      display: block;
+    }
 
-  .dark-selector {
-    color: #cccccc;
-    border: 1px #000000 solid;
-    background: #333333;
-    box-shadow: 0 1px 2px #000 inset;
+    .button-container{
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+    }
+
+    .dark-selector {
+      color: #cccccc;
+      border: 1px #000000 solid;
+      background: #333333;
+      box-shadow: 0 1px 2px #000 inset;
+      width: 100%;
+    }
   }
 }

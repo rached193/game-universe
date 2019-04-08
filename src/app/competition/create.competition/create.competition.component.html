@@ -2,7 +2,7 @@
 
   <div>
     <label>Competition Name</label>
-    <input formControlName="name" type="text">
+    <input class="dark-selector" formControlName="name" type="text">
   </div>
 
   <div>
@@ -34,7 +34,7 @@
   </div>
 
 
-  <div>
+  <div class="button-container">
     <button type="reset" (click)="revert()" [disabled]="competitionForm.pristine">Revert</button>
     <button type="submit" [disabled]="competitionForm.pristine">Save</button>
   </div>
