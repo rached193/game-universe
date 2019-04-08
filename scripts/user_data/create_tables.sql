@@ -1,0 +1,32 @@
+/*Account*/
+CREATE TABLE user_data.ACCOUNT(
+	  ID INTEGER,
+	  LOGIN character varying(320) NOT NULL,
+	  PASSWORD character varying(20) NOT NULL,
+	  NAME character varying(50) NOT NULL,
+    ENABLED BOOLEAN NOT NULL,
+	  PRIMARY KEY (ID),
+	  UNIQUE (LOGIN)
+);
+
+/*Organization*/
+CREATE TABLE user_data.ORGANIZATION(
+    ID INTEGER,
+	  NAME character varying(50) NOT NULL,
+	  CONTACT_MAIL character varying(320),
+	  CONTACT_NUMBER INTEGER,
+	  LOGO character varying(20),
+    ENABLED BOOLEAN NOT NULL,
+	  PRIMARY KEY (ID),
+	  UNIQUE (NAME)
+);
+
+/*Administration*/
+CREATE TABLE user_data.ADMINISTRATION(
+    ORGANIZATION INTEGER,
+	  ACCOUNT INTEGER,
+    ENABLED BOOLEAN NOT NULL,
+	  PRIMARY KEY (ORGANIZATION, ACCOUNT),
+	  FOREIGN KEY (ORGANIZATION) REFERENCES user_data.ORGANIZATION (ID),
+	  FOREIGN KEY (ACCOUNT) REFERENCES user_data.ACCOUNT (ID)
+);
