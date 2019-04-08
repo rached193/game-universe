@@ -8,7 +8,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class CreateCompetitionComponent implements OnInit {
 
-  contactForm: FormGroup;
+  competitionForm: FormGroup;
 
   videogames = [
     {
@@ -36,7 +36,7 @@ export class CreateCompetitionComponent implements OnInit {
   ];
 
   constructor() {
-    this.contactForm = this.createFormGroup();
+    this.competitionForm = this.createFormGroup();
   }
 
   ngOnInit() {
@@ -51,5 +51,13 @@ export class CreateCompetitionComponent implements OnInit {
       mode: new FormControl()
     }
     );
+  }
+
+  revert() {
+
+  }
+
+  onSubmit() {
+
   }
 }

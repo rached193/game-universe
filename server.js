@@ -6,12 +6,12 @@ const pg = require('pg');
 
 const app = express();
 const pool = new pg.Pool({
-  user: 'ebiypfwrqgauhd',
-  host: 'ec2-54-247-70-127.eu-west-1.compute.amazonaws.com',
-  database: 'db52vg2qmaqvaj',
-  password: '450b56f7a62ec0fd1024d07d13e715c101082caf81878a9507b0657b58ebe6ac',
-  port: 5432,
-  ssl: true
+    user: 'ebiypfwrqgauhd',
+    host: 'ec2-54-247-70-127.eu-west-1.compute.amazonaws.com',
+    database: 'db52vg2qmaqvaj',
+    password: '450b56f7a62ec0fd1024d07d13e715c101082caf81878a9507b0657b58ebe6ac',
+    port: 5432,
+    ssl: true
 });
 
 // Serve only the static files form the dist directory
@@ -47,8 +47,11 @@ app.get('/addCompetitions', function (req, res) {
 });
 
 // Start the app by listening on the default Heroku port
-app.listen(process.env.PORT || 8080);
 
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`Server running at ${port}`);
+});
 
 
 

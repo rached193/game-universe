@@ -1,32 +1,24 @@
-input {
-  width: 20%;
-  padding: 16px 20px;
-  border: none;
-  border-radius: 4px;
-  background-color: #f1f1f1;
-  margin: 4px 2px;
-}
-select {
-  width: 20%;
-  padding: 16px 20px;
-  border: none;
-  border-radius: 4px;
-  background-color: #f1f1f1;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-button[type=button], button[type=submit], button[type=reset] {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 16px 32px;
-  text-decoration: none;
-  margin: 4px 2px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-label {
-  font-weight: bold;
-  color: white;
-  padding: 16px 32px;
+:host{
+  display: flex;
+  justify-content: center;
+  padding: 10em 0;
+  margin: 4em 0;
+
+  background: url(~/assets/images/fondo.jpg) no-repeat center;
+  background-size: cover;
+  position: relative;
+  min-height: 400px;
+
+  form {
+    background-color: #212124f5;
+
+  }
+
+
+  .dark-selector {
+    color: #cccccc;
+    border: 1px #000000 solid;
+    background: #333333;
+    box-shadow: 0 1px 2px #000 inset;
+  }
 }
