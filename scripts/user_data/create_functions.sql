@@ -114,7 +114,7 @@ END;
 $BODY$;
 
 /*Create Administration*/
-CREATE OR REPLACE FUNCTION user_data.create_organization(
+CREATE OR REPLACE FUNCTION user_data.create_administration(
 	p_organization integer,
   p_account integer)
     RETURNS integer
