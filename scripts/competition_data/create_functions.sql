@@ -88,6 +88,26 @@ BEGIN
 END;
 $BODY$;
 
+/*Get Competition Filters*/
+CREATE OR REPLACE FUNCTION competition_data.get_competition_filters(
+  p_videogame integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+	  'platforms', competition_data.get_platforms(p_videogame),
+	  'regions', competition_data.get_regions(p_videogame),
+	  'gamemodes', competition_data.get_gamemodes(p_videogame)
+  ) into v_result;
+
+  RETURN v_result;
+END;
+$BODY$;
+
 /*Create Competition*/
 CREATE OR REPLACE FUNCTION competition_data.create_competition(
 	p_organization integer,
