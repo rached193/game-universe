@@ -5,18 +5,18 @@ CREATE OR REPLACE FUNCTION master_data.create_videogame(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.VIDEOGAME_SEQ') into v_id;
-   
+
    INSERT INTO master_data.VIDEOGAME (ID, NAME, ENABLED) VALUES
    (v_id, p_name, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.VIDEOGAME_SEQ', currval('master_data.VIDEOGAME_SEQ') - 1);
@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_videogame(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.VIDEOGAME
@@ -40,7 +40,30 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit Videogame*/
+CREATE OR REPLACE FUNCTION master_data.edit_videogame(
+	p_id integer,
+	p_name text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.VIDEOGAME
+   SET name = p_name
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -74,18 +97,18 @@ CREATE OR REPLACE FUNCTION master_data.create_platform(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.PLATFORM_SEQ') into v_id;
-   
+
    INSERT INTO master_data.PLATFORM (ID, NAME, ENABLED) VALUES
    (v_id, p_name, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.PLATFORM_SEQ', currval('master_data.PLATFORM_SEQ') - 1);
@@ -101,7 +124,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_platform(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.PLATFORM
@@ -109,7 +132,30 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit Platform*/
+CREATE OR REPLACE FUNCTION master_data.edit_platform(
+	p_id integer,
+	p_name text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.PLATFORM
+   SET name = p_name
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -144,18 +190,18 @@ CREATE OR REPLACE FUNCTION master_data.create_region(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.REGION_SEQ') into v_id;
-   
+
    INSERT INTO master_data.REGION (ID, VIDEOGAME, NAME, ENABLED) VALUES
    (v_id, p_videogame, p_name, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.REGION_SEQ', currval('master_data.REGION_SEQ') - 1);
@@ -171,7 +217,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_region(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.REGION
@@ -179,7 +225,30 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit Region*/
+CREATE OR REPLACE FUNCTION master_data.edit_region(
+	p_id integer,
+	p_name text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.REGION
+   SET name = p_name
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -218,18 +287,18 @@ CREATE OR REPLACE FUNCTION master_data.create_gamemode(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.GAMEMODE_SEQ') into v_id;
-   
+
    INSERT INTO master_data.GAMEMODE (ID, VIDEOGAME, NAME, ENABLED) VALUES
    (v_id, p_videogame, p_name, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.GAMEMODE_SEQ', currval('master_data.GAMEMODE_SEQ') - 1);
@@ -245,7 +314,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_gamemode(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.GAMEMODE
@@ -253,7 +322,30 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit GameMode*/
+CREATE OR REPLACE FUNCTION master_data.edit_gamemode(
+	p_id integer,
+	p_name text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.GAMEMODE
+   SET name = p_name
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -292,14 +384,14 @@ CREATE OR REPLACE FUNCTION master_data.create_videogame_platform(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    INSERT INTO master_data.VIDEOGAME_PLATFORM (VIDEOGAME, PLATFORM, ENABLED) VALUES
    (p_videogame, p_platform, 'false');
 
    RETURN 0;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -315,7 +407,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_videogame_platform(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.VIDEOGAME_PLATFORM
@@ -324,7 +416,7 @@ BEGIN
    AND PLATFORM = p_platform;
 
    RETURN 0;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -364,18 +456,18 @@ CREATE OR REPLACE FUNCTION master_data.create_format(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.FORMAT_SEQ') into v_id;
-   
+
    INSERT INTO master_data.FORMAT (ID, NAME, ENABLED) VALUES
    (v_id, p_name, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.FORMAT_SEQ', currval('master_data.FORMAT_SEQ') - 1);
@@ -391,7 +483,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_format(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.FORMAT
@@ -399,7 +491,30 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit Format*/
+CREATE OR REPLACE FUNCTION master_data.edit_format(
+	p_id integer,
+	p_name text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.FORMAT
+   SET name = p_name
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;
@@ -434,18 +549,18 @@ CREATE OR REPLACE FUNCTION master_data.create_bo(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 declare
 	v_id integer;
 BEGIN
    SELECT nextval('master_data.BO_SEQ') into v_id;
-   
+
    INSERT INTO master_data.BO (ID, NAME, GAMES, ENABLED) VALUES
    (v_id, p_name, p_games, 'false');
 
    RETURN v_id;
-   
+
    EXCEPTION
    WHEN OTHERS THEN
    PERFORM setval('master_data.BO_SEQ', currval('master_data.BO_SEQ') - 1);
@@ -461,7 +576,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_bo(
     LANGUAGE 'plpgsql'
 
     COST 100
-    VOLATILE 
+    VOLATILE
 AS $BODY$
 BEGIN
    UPDATE master_data.BO
@@ -469,7 +584,31 @@ BEGIN
    WHERE ID = p_id;
 
    RETURN 0;
-   
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Edit Bo*/
+CREATE OR REPLACE FUNCTION master_data.edit_bo(
+	p_id integer,
+	p_name text,
+  p_games integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE master_data.BO
+   SET name = p_name, games = p_games
+   WHERE ID = p_id;
+
+   RETURN 0;
+
    EXCEPTION
    WHEN OTHERS THEN
    RETURN -1;

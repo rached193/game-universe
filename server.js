@@ -6,10 +6,10 @@ const pg = require('pg');
 
 const app = express();
 const pool = new pg.Pool({
-    user: 'ebiypfwrqgauhd',
-    host: 'ec2-54-247-70-127.eu-west-1.compute.amazonaws.com',
-    database: 'db52vg2qmaqvaj',
-    password: '450b56f7a62ec0fd1024d07d13e715c101082caf81878a9507b0657b58ebe6ac',
+    user: 'xbbhrkvssfuetu',
+    host: 'ec2-54-195-252-243.eu-west-1.compute.amazonaws.com',
+    database: 'dcbdsmfutcv57e',
+    password: 'a13806713fe574ff9dfa2288840c12ca9f66ab2579e851341a8ce87c4e2ce15c',
     port: 5432,
     ssl: true
 });
