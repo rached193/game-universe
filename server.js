@@ -39,14 +39,14 @@ app.get("/addCompetitions", function defaultRoute(req, res) {
 
 app.post("/register", (req, res) => {
     console.log("/register: ", req.body);
-    var query = 'SELECT user_data.create_account(jorge, jorge, jorge) as data;';
+    var query = 'SELECT user_data.create_account($1, $2, $3) as data;';
 
-    sharedPgClient.query(query, (err, result) => {
+    sharedPgClient.query(query, ['pepe', 'pepe', 'pepe'], (err, result) => {
 
         console.log(err);
-        console.log(result);
+        console.log(result.rows);
 
-        res.send(result)
+        res.send(result.rows);
     });
 });
 
