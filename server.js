@@ -36,6 +36,20 @@ app.get("/addCompetitions", function defaultRoute(req, res) {
     });
 });
 
+
+app.post("/register", (req, res) => {
+    console.log("/register: ", req.body);
+    var query = 'SELECT user_data.create_account(jorge, jorge, jorge) as data;';
+
+    sharedPgClient.query(query, (err, result) => {
+
+        console.log(err);
+        console.log(result);
+
+        res.send(result)
+    });
+});
+
 app.get('/*', function (req, res) {
 
     res.sendFile(path.join(__dirname + '/dist/game-universe/index.html'));
