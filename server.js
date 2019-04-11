@@ -28,7 +28,7 @@ pool.connect(function (err, client) {
 });
 
 app.get("/addCompetitions", function defaultRoute(req, res) {
-    var query = "SELECT * FROM Competitions.master_format";
+    var query = "SELECT master_data.get_videogames()";
 
     sharedPgClient.query(query, function (err, result) {
         console.log("Jobs Query Result Count: " + result.rows.length);
