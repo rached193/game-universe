@@ -108,6 +108,32 @@ BEGIN
 END;
 $BODY$;
 
+/*Get Organizations*/
+CREATE OR REPLACE FUNCTION competition_data.get_organizations(
+  p_account integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', o.id,
+    'name', o.name
+  )) into v_result
+  FROM user_data.organization o
+  WHERE o.enabled
+  AND o.id IN(
+	  SELECT a.organization
+	  FROM user_data.administration a
+	  WHERE a.account = p_account
+    AND a.enabled);
+
+   RETURN v_result;
+END;
+$BODY$;
+
 /*Create Competition*/
 CREATE OR REPLACE FUNCTION competition_data.create_competition(
 	p_organization integer,
@@ -134,7 +160,215 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('competition_data.COMPETITION_SEQ', currval('competition_data.COMPETITION_SEQ') - 1);
    RETURN -1;
+END;
+$BODY$;
+
+/*Enable Competition*/
+CREATE OR REPLACE FUNCTION competition_data.enable_competition(
+	p_id integer,
+	p_enabled boolean)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE competition_data.competition
+   SET ENABLED = p_enabled
+   WHERE ID = p_id;
+
+   RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Get Competition*/
+CREATE OR REPLACE FUNCTION competition_data.get_competition(
+  p_id integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'id', c.id,
+    'organization', o.name,
+    'name', c.name,
+    'videogame', v.name,
+    'platform', p.name,
+    'region', r.name,
+    'gamemode', g.name,
+    'enabled', c.enabled
+  ) into v_result
+  FROM competition_data.competition c
+  JOIN user_data.organization o ON c.organization = o.id
+  JOIN master_data.videogame v ON c.videogame = v.id
+  JOIN master_data.platform p ON c.platform = p.id
+  JOIN master_data.region r ON c.region = r.id
+  JOIN master_data.gamemode g ON c.gamemode = g.id
+  WHERE c.id = p_id;
+
+  RETURN v_result;
+END;
+$BODY$;
+
+/*Get Competitions*/
+CREATE OR REPLACE FUNCTION competition_data.get_competitions(
+  p_organization integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', c.id,
+    'name', c.name
+  )) into v_result
+  FROM competition_data.competition c
+  WHERE c.organization = p_organization;
+
+   RETURN v_result;
+END;
+$BODY$;
+
+/*Get Formats*/
+CREATE OR REPLACE FUNCTION competition_data.get_formats()
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+   SELECT jsonb_agg(jsonb_build_object(
+		'id', f.id,
+		'name', f.name
+	)) into v_result
+	FROM master_data.format f
+  WHERE f.enabled;
+
+   RETURN v_result;
+END;
+$BODY$;
+
+/*Get Bos*/
+CREATE OR REPLACE FUNCTION competition_data.get_bos()
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+   SELECT jsonb_agg(jsonb_build_object(
+		'id', b.id,
+		'name', b.name
+	)) into v_result
+	FROM master_data.bo b
+  WHERE b.enabled;
+
+   RETURN v_result;
+END;
+$BODY$;
+
+/*Next Phase*/
+CREATE OR REPLACE FUNCTION competition_data.get_next_phase(
+	p_competition integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+	v_phase integer;
+BEGIN
+    SELECT coalesce(max(phase),0)+1 into v_phase
+    FROM competition_data.phase p
+    WHERE p.competition = p_competition;
+
+    RETURN v_phase;
+END;
+$BODY$;
+
+/*Create Phase*/
+CREATE OR REPLACE FUNCTION competition_data.create_phase(
+	p_competition integer,
+	p_format integer,
+	p_bo integer,
+	p_groups integer,
+	p_participants integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+	v_id integer;
+BEGIN
+   SELECT nextval('competition_data.phase_SEQ') into v_id;
+
+   INSERT INTO competition_data.PHASE (ID, COMPETITION, PHASE, FORMAT, BO, GROUPS, PARTICIPANTS, ENABLED) VALUES
+   (v_id, p_competition, competition_data.get_next_phase(p_competition), p_format, p_bo, p_groups, p_participants, 'false');
+
+   RETURN v_id;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Enable Phase*/
+CREATE OR REPLACE FUNCTION competition_data.enable_phase(
+	p_id integer,
+	p_enabled boolean)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE competition_data.phase
+   SET ENABLED = p_enabled
+   WHERE ID = p_id;
+
+   RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Get Phases*/
+CREATE OR REPLACE FUNCTION competition_data.get_phases(
+  p_competition integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', p.id,
+    'phase', p.phase
+  )) into v_result
+  FROM competition_data.phase p
+  WHERE p.competition = p_competition;
+
+   RETURN v_result;
 END;
 $BODY$;

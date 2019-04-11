@@ -6,7 +6,8 @@ CREATE TABLE user_data.ACCOUNT(
 	  NAME character varying(50) NOT NULL,
     ENABLED BOOLEAN NOT NULL,
 	  PRIMARY KEY (ID),
-	  UNIQUE (LOGIN)
+	  UNIQUE (LOGIN),
+    UNIQUE (NAME)
 );
 
 /*Organization*/

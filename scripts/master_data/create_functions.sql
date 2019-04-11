@@ -19,7 +19,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.VIDEOGAME_SEQ', currval('master_data.VIDEOGAME_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -111,7 +110,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.PLATFORM_SEQ', currval('master_data.PLATFORM_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -204,7 +202,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.REGION_SEQ', currval('master_data.REGION_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -301,7 +298,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.GAMEMODE_SEQ', currval('master_data.GAMEMODE_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -470,7 +466,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.FORMAT_SEQ', currval('master_data.FORMAT_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -563,7 +558,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('master_data.BO_SEQ', currval('master_data.BO_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;

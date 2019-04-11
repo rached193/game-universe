@@ -21,7 +21,6 @@ BEGIN
 
    EXCEPTION
    WHEN OTHERS THEN
-   PERFORM setval('user_data.ACCOUNT_SEQ', currval('user_data.ACCOUNT_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -151,7 +150,6 @@ BEGIN
 
   EXCEPTION
   WHEN OTHERS THEN
-   PERFORM setval('user_data.ORGANIZATION_SEQ', currval('user_data.ORGANIZATION_SEQ') - 1);
    RETURN -1;
 END;
 $BODY$;
@@ -250,8 +248,7 @@ BEGIN
 		  'mail', o.contact_mail,
 		  'number', o.contact_number),
 	  'logo', o.logo,
-	  'enabled', o.enabled,
-	  'administrations', user_data.get_administrations(p_id)
+	  'enabled', o.enabled
   ) into v_result
   FROM user_data.organization o
   WHERE o.id = p_id;
