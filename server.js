@@ -1,10 +1,15 @@
 //Install express server
 const express = require('express');
+const bodyParser = require("body-parser");
 const path = require('path');
 const pg = require('pg');
 
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 const pool = new pg.Pool({
     user: 'xbbhrkvssfuetu',
     host: 'ec2-54-195-252-243.eu-west-1.compute.amazonaws.com',
@@ -39,13 +44,14 @@ app.get("/addCompetitions", function defaultRoute(req, res) {
 
 app.post("/register", (req, res) => {
     console.log("/register: ", req.body);
+
+    const params = req.body;
     var query = 'SELECT user_data.create_account($1, $2, $3) as data;';
 
-    sharedPgClient.query(query, ['pepe', 'pepe', 'pepe'], (err, result) => {
+    sharedPgClient.query(query, [params.login, params.password, params.name], (err, result) => {
 
         console.log(err);
-        console.log(result.rows);
-
+        
         res.send(result.rows);
     });
 });
