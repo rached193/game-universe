@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -20,8 +19,8 @@ export class SignInService {
       // );
   }
 
-  handleError(a, b) {
-    return 1;
-  }
+  // handleError(a, b) {
+  //   return 1;
+  // }
 
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { SignInService } from './sign-in.service';
+import { AuthenticationService } from '../core/autentication.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -11,7 +11,7 @@ export class SignInComponent implements OnInit {
 
   userForm: FormGroup;
 
-  constructor(private formBuilder: FormBuilder, private signInService: SignInService) { }
+  constructor(private formBuilder: FormBuilder, private autenticationService: AuthenticationService) { }
 
   ngOnInit() {
     this.userForm = this.formBuilder.group({
@@ -22,9 +22,9 @@ export class SignInComponent implements OnInit {
   }
 
   onSubmit(f) {
-    console.log('helllo');
-    this.signInService.registerUser(f.value).subscribe((response) => {
-      console.log('repsonse ', response);
+    this.autenticationService.registerUser(f.value).subscribe((result) => {
+
+
     });
   }
 }
