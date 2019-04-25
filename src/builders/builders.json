@@ -1,0 +1,10 @@
+{
+  "$schema": "@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "builder-name": {
+      "class": "path-to-builder-class",
+      "schema": "path-to-builder-schema",
+      "description": "builder-description"
+    }
+  }
+}
