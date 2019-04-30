@@ -59,5 +59,6 @@ export class CreateCompetitionComponent implements OnInit {
 
   onSubmit() {
 
+
   }
 }
