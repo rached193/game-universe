@@ -9,6 +9,7 @@ import { CreateCompetitionComponent } from './competition/create.competition/cre
 import { HomepageComponent } from './competition/homepage/homepage.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { LoginComponent } from './login/login.component';
+import { NavbarComponent } from './navbar/navbar.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { LoginComponent } from './login/login.component';
     CreateCompetitionComponent,
     HomepageComponent,
     SignInComponent,
-    LoginComponent
+    LoginComponent,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,

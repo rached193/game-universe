@@ -1,0 +1,8 @@
+<nav id="nav">
+  <ul>
+    <li class="current_page_item"><a routerLink="home">Homepage</a></li>
+    <li *ngIf="currentUser.username"><a routerLink="/create-competition" class="button button-alt">Crear Competicion</a></li>
+    <li *ngIf="!currentUser.username"><a routerLink="/sign-in" class="button button-alt">Crear Usuario</a></li>
+    <li *ngIf="!currentUser.username"><a routerLink="/login" class="button button-alt">Login</a></li>
+  </ul>
+</nav>
