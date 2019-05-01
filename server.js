@@ -19,6 +19,7 @@ const pool = new pg.Pool({
     ssl: true
 });
 
+
 // Serve only the static files form the dist directory
 app.use(express.static(__dirname + '/dist/game-universe'));
 
