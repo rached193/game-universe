@@ -8,6 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CreateCompetitionComponent } from './competition/create.competition/create.competition.component';
 import { HomepageComponent } from './competition/homepage/homepage.component';
 import { SignInComponent } from './sign-in/sign-in.component';
+import { LoginComponent } from './login/login.component';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { SignInComponent } from './sign-in/sign-in.component';
     AppComponent,
     CreateCompetitionComponent,
     HomepageComponent,
-    SignInComponent
+    SignInComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
