@@ -29,7 +29,7 @@ export class AuthenticationService {
         this._currentUser = user;
       }
       register.next(response);
-    })
+    });
     return register;
   }
 
@@ -37,7 +37,7 @@ export class AuthenticationService {
     const register = new Subject<boolean>();
     this.http.post<User | false>('auhtenticate', { userLogin, password }).subscribe(response => {
 
-      if (response instanceof User && (<User>response).userLogin) {
+      if (response instanceof User && (response as User).userLogin) {
         this._currentUser = response;
         register.next(true);
       } else {

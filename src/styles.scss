@@ -40,3 +40,43 @@ a:hover
 {
 	text-decoration: none;
 }
+
+
+//Forms
+
+form {
+  background-color: #BDBBB0;
+  padding: 2em;
+
+  display: flex;
+  flex-direction: column;
+
+  p {
+    line-height: 1em;
+    color: #000;
+    margin-top: 0;
+    font-size: 20pt;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  label {
+    display: block;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .button-container{
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+  }
+
+  .dark-selector {
+    color: #cccccc;
+    border: 1px #000000 solid;
+    background: #333301;
+    box-shadow: 0 1px 2px #000 inset;
+    width: 100%;
+  }
+}

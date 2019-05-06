@@ -27,7 +27,7 @@ export class SignInComponent implements OnInit {
     this.autenticationService.registerUser(f.value).subscribe((result) => {
       if (result) {
         this.router.navigate(['home']);
-      }else{
+      } else {
       }
     });
   }
