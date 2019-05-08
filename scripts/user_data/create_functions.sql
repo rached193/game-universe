@@ -15,7 +15,7 @@ BEGIN
    SELECT nextval('user_data.ACCOUNT_SEQ') into v_id;
 
    INSERT INTO user_data.ACCOUNT (ID, LOGIN, PASSWORD, NAME, ENABLED) VALUES
-   (v_id, p_login, p_password, p_name, 'false');
+   (v_id, p_login, p_password, p_name, 'true');
 
    RETURN v_id;
 
@@ -91,6 +91,103 @@ BEGIN
   WHERE a.id = p_id;
 
   RETURN v_result;
+END;
+$BODY$;
+
+/*Login*/
+CREATE OR REPLACE FUNCTION user_data.login(
+  p_login text,
+  p_password text)
+    RETURNS text
+    LANGUAGE 'plpgsql'
+AS $BODY$
+declare
+  v_account integer;
+  v_enabled boolean;
+  v_token text;
+  v_count integer;
+  v_done boolean = false;
+BEGIN
+  SELECT ID, ENABLED into v_account, v_enabled
+  FROM user_data.ACCOUNT
+  WHERE login = p_login
+  AND password = p_password;
+
+  IF v_account IS NULL OR NOT v_enabled THEN
+    v_token = 'denied';
+  ELSE
+    WHILE v_done = false LOOP
+      SELECT MD5(random()::text) into v_token;
+
+      SELECT count(1) INTO v_count
+      FROM user_data.SESSION
+      WHERE token = v_token;
+
+      IF v_count = 0 THEN
+        INSERT INTO user_data.SESSION (TOKEN, ACCOUNT, ORGANIZATIONS, CADUCITY) VALUES
+        (v_token, v_account,
+          (SELECT array_agg(o.id)
+          FROM user_data.administration a
+          JOIN user_data.organization o
+          ON a.organization = o.id
+          WHERE a.account = v_account
+          AND a.enabled
+          AND o.enabled), localtimestamp + interval '1 day');
+        v_done = true;
+      END IF;
+    END LOOP;
+  END IF;
+
+  RETURN v_token;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+    RETURN 'error: '||SQLERRM;
+END;
+$BODY$;
+
+/*Get Token Info*/
+CREATE OR REPLACE FUNCTION user_data.get_token_info(
+  p_token text)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+AS $BODY$
+declare
+  v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'result', 'ok',
+    'account', s.account,
+    'organizations', s.organizations
+  ) into v_result
+  FROM user_data.SESSION s
+  WHERE s.token = p_token
+  AND localtimestamp < s.caducity;
+
+  RETURN v_result;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+    RETURN '{"result": "error"}'::jsonb;
+END;
+$BODY$;
+
+/*Logout*/
+CREATE OR REPLACE FUNCTION user_data.logout(
+  p_account integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+AS $BODY$
+declare
+BEGIN
+  DELETE FROM user_data.SESSION
+  WHERE account = p_account;
+
+  RETURN 0;
+
+  EXCEPTION
+    WHEN OTHERS THEN
+    RETURN -1;
 END;
 $BODY$;
 

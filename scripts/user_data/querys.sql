@@ -28,3 +28,10 @@ SELECT user_data.create_administration(p_organization, p_account) as data;
 SELECT user_data.enable_administration(p_organization, p_account, p_enabled) as data;
 
 SELECT user_data.get_administrations(p_organization) as data;
+
+/*Session*/
+SELECT user_data.login(p_login, p_password) as data;
+
+SELECT user_data.get_token_info(p_token) as data
+
+SELECT user_data.logout(p_account) as data;
