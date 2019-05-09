@@ -316,7 +316,7 @@ AS $BODY$
 declare
 	v_id integer;
 BEGIN
-   SELECT nextval('competition_data.phase_SEQ') into v_id;
+   SELECT nextval('competition_data.PHASE_SEQ') into v_id;
 
    INSERT INTO competition_data.PHASE (ID, COMPETITION, PHASE, FORMAT, BO, GROUPS, PARTICIPANTS, ENABLED) VALUES
    (v_id, p_competition, competition_data.get_next_phase(p_competition), p_format, p_bo, p_groups, p_participants, 'false');
@@ -370,5 +370,172 @@ BEGIN
   WHERE p.competition = p_competition;
 
    RETURN v_result;
+END;
+$BODY$;
+
+/*Get Phase*/
+CREATE OR REPLACE FUNCTION competition_data.get_phase(
+  p_id integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'id', c.id,
+    'competition', c.name,
+    'phase', p.phase,
+    'format', f.name,
+    'bo', b.name,
+    'groups', p.groups,
+    'participants', p.participants,
+    'enabled', p.enabled
+  ) into v_result
+  FROM competition_data.phase p
+  JOIN competition_data.competition c ON p.competition = c.id
+  JOIN master_data.format f ON p.format = f.id
+  JOIN master_data.bo b ON p.bo = b.id
+  WHERE p.id = p_id;
+
+  RETURN v_result;
+END;
+$BODY$;
+
+/*Get Participants*/
+CREATE OR REPLACE FUNCTION competition_data.get_participants(
+  p_phase integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', p.id,
+    'account', jsonb_build_object(
+      'id', a.id,
+      'name', a.name),
+    'group', p.ngroup,
+    'confirmed', p.confirmed
+  )) into v_result
+  FROM competition_data.participant p
+  JOIN user_data.account a ON p.account = a.id
+  WHERE p.phase = p_phase;
+
+   RETURN v_result;
+END;
+$BODY$;
+
+/*Create Participant*/
+CREATE OR REPLACE FUNCTION competition_data.create_participant(
+	p_phase integer,
+	p_account integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+	v_id integer;
+BEGIN
+   SELECT nextval('competition_data.PARTICIPANT_SEQ') into v_id;
+
+   INSERT INTO competition_data.PARTICIPANT (ID, PHASE, ACCOUNT) VALUES
+   (v_id, p_phase, p_account);
+
+   RETURN v_id;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Confirm Participant*/
+CREATE OR REPLACE FUNCTION competition_data.confirm_participant(
+	p_id integer,
+	p_confirmed boolean)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+  IF p_confirmed THEN
+    UPDATE competition_data.participant
+    SET CONFIRMED = p_confirmed
+    WHERE ID = p_id;
+  ELSE
+    DELETE FROM competition_data.participant
+    WHERE ID = p_id;
+  END IF;
+
+   RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Set Groups*/
+CREATE OR REPLACE FUNCTION competition_data.set_groups(
+	p_phase integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+  v_groups integer;
+  v_participants integer;
+  v_total integer;
+  v_group integer[];
+  v_participant integer[];
+  v_aux integer;
+BEGIN
+  SELECT groups, participants into v_groups, v_participants
+  FROM competition_data.phase p
+  WHERE p.id = p_phase;
+
+  IF v_groups = 1 THEN
+    UPDATE competition_data.participant
+    SET ngroup = 1
+    WHERE phase = p_phase;
+  ELSE
+    v_total = v_groups*v_participants;
+
+    SELECT array_agg(p.id) into v_participant
+    FROM competition_data.participant p
+    WHERE p.phase = p_phase;
+
+    FOR g IN 1..v_groups LOOP
+      FOR p IN 1..v_participants LOOP
+        SELECT array_append(v_group, g) into v_group;
+      END LOOP;
+    END LOOP;
+
+    FOR a IN 1..(v_total) LOOP
+      SELECT v_participant[(random()*(v_total-a))::int+1] into v_aux;
+
+      UPDATE competition_data.participant
+      SET ngroup = v_group[a]
+      WHERE id = v_aux;
+
+      SELECT array_remove(v_participant, v_aux) into v_participant;
+    END LOOP;
+  END IF;
+
+  RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
 END;
 $BODY$;
