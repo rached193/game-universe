@@ -3,9 +3,8 @@
 
 #header-wrapper
 {
-    background: url(~/assets/images/cabecera.jpg) no-repeat center;
-    background-size: cover;
-    position: relative;
+  background-color: #8A897C;
+  position: relative;
 }
 
 #header-wrapper:before
@@ -51,7 +50,6 @@ header .byline
 #banner
 {
     overflow: hidden;
-    padding: 10em 0em;
     text-align: center;
     z-index: 1;
     position: relative;

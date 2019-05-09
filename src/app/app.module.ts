@@ -10,6 +10,7 @@ import { HomepageComponent } from './competition/homepage/homepage.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { LoginComponent } from './login/login.component';
 import { NavbarComponent } from './navbar/navbar.component';
+import { VisualComponent } from './visual/visual.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { NavbarComponent } from './navbar/navbar.component';
     HomepageComponent,
     SignInComponent,
     LoginComponent,
-    NavbarComponent
+    NavbarComponent,
+    VisualComponent
   ],
   imports: [
     BrowserModule,
