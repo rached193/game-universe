@@ -35,3 +35,12 @@ SELECT competition_data.enable_phase(p_id, p_enabled) as data;
 SELECT competition_data.get_phases(p_competition) as data;
 
 SELECT competition_data.get_phase(p_id) as data;
+
+/*Participant*/
+SELECT competition_data.get_participants(p_phase) as data;
+
+SELECT competition_data.create_participant(p_phase, p_account) as data;
+
+SELECT competition_data.confirm_participant(p_id, p_confirmed) as data;
+
+SELECT competition_data.set_groups(p_phase) as data;
