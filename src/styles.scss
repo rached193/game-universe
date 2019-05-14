@@ -100,33 +100,39 @@ form {
 button.game-button {
   font-family: 'Poppins','Open Sans', sans-serif;
   padding: 0.5em 1em;
-  background-color: #477a93;
+  
   color: #FFF;
   border-radius: 28px;
   border: none;
   text-decoration: none;
   cursor: pointer;
+  &.light{
+    background-color: rgb(255,126,126);
+  }
+  &.dark{
+    background-color: #477a93;
+    &:hover,&.hover{
+      background-color: rgb(71, 102, 148);
+    }
+    &:active,&.active{
+      background-color:rgb(105, 134, 207);
+      background-size: 100%;
+      transition: background 0s;
+    }
+    &.disabled{
+      background-color: hsla(200, 35%, 43%, 0.38);
+    }
+  }
 
-  &:hover,&.hover{
-    background-color: rgb(71, 102, 148);
-  }
-  &:active,&.active{
-    // position: relative;
-    // top: 1px;
-    background-color: #6b87d5;
-    background-size: 100%;
-    transition: background 0s;
-  }
-  &.disabled{
-    background-color: hsla(200, 35%, 43%, 0.38);
-  }
-}
+  &.game-icon{
+    border-radius: 50%;
+    font-size: 0;
 
-button.game-icon{
-  background-color: #091318;
-  color: #FFF;
-  border-radius: 50px;
-  border: none;
-  text-decoration: none;
-  cursor: pointer;
+    .icon{
+      width: 25px;
+      height: 25px;
+      margin: 10px;
+    }
+
+  }
 }

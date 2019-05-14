@@ -1,17 +1,19 @@
 .visual-container{
-  display: block;
-  .button-container{
-    justify-content: center;
-    display: grid;
-    margin: 1em 0em;
-    color: black;
-  }
-  .icon{
-    width: 10px;
-    height: 10px;
-  }
- .icon-plus{
-  fill: #ffffff;
+  display: flex;
+  .visual-column{
+    flex: 50%;
+    .button-container{
+      justify-content: center;
+      display: grid;
+      margin: 1em 0em;
+      color: black;
+    }
+    .button-container-row{
+      display: inline-block;
+      margin: 1em 1em;
+      color: black;
+    }
 
   }
 }
+
