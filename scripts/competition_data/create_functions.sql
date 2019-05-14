@@ -384,7 +384,7 @@ declare
 	v_result jsonb;
 BEGIN
   SELECT jsonb_build_object(
-    'id', c.id,
+    'id', p.id,
     'competition', c.name,
     'phase', p.phase,
     'format', f.name,
@@ -531,6 +531,158 @@ BEGIN
       SELECT array_remove(v_participant, v_aux) into v_participant;
     END LOOP;
   END IF;
+
+  RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Next Round*/
+CREATE OR REPLACE FUNCTION competition_data.get_next_round(
+	p_phase integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+	v_round integer;
+BEGIN
+    SELECT coalesce(max(round),0)+1 into v_round
+    FROM competition_data.round r
+    WHERE r.phase = p_phase;
+
+    RETURN v_round;
+END;
+$BODY$;
+
+/*Create Round*/
+CREATE OR REPLACE FUNCTION competition_data.create_round(
+	p_phase integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+	v_id integer;
+BEGIN
+   SELECT nextval('competition_data.ROUND_SEQ') into v_id;
+
+   INSERT INTO competition_data.ROUND (ID, PHASE, ROUND, ENABLED) VALUES
+   (v_id, p_phase, competition_data.get_next_round(p_phase), 'false');
+
+   RETURN v_id;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Enable Round*/
+CREATE OR REPLACE FUNCTION competition_data.enable_round(
+	p_id integer,
+	p_enabled boolean)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+BEGIN
+   UPDATE competition_data.round
+   SET ENABLED = p_enabled
+   WHERE ID = p_id;
+
+   RETURN 0;
+
+   EXCEPTION
+   WHEN OTHERS THEN
+   RETURN -1;
+END;
+$BODY$;
+
+/*Get Rounds*/
+CREATE OR REPLACE FUNCTION competition_data.get_rounds(
+  p_phase integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_agg(jsonb_build_object(
+    'id', r.id,
+    'round', r.round
+  )) into v_result
+  FROM competition_data.round r
+  WHERE r.phase = p_phase;
+
+   RETURN v_result;
+END;
+$BODY$;
+
+/*Get Round*/
+CREATE OR REPLACE FUNCTION competition_data.get_round(
+  p_id integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'id', r.id,
+    'phase', p.phase,
+    'round', r.round,
+    'enabled', r.enabled
+  ) into v_result
+  FROM competition_data.round r
+  JOIN competition_data.phase p ON r.phase = p.id
+  WHERE p.id = p_id;
+
+  RETURN v_result;
+END;
+$BODY$;
+
+/*Set Rounds*/
+CREATE OR REPLACE FUNCTION competition_data.set_rounds(
+  p_phase integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+  v_participants integer;
+  v_format integer;
+  v_rounds integer;
+BEGIN
+  SELECT participants, format into v_participants, v_format
+  FROM competition_data.phase p
+  WHERE p.id = p_phase;
+
+  CASE v_format
+  WHEN 1 THEN
+    v_rounds = (v_participants - 1);
+  WHEN 2 THEN
+    v_rounds = log(2, v_participants)::integer;
+  WHEN 3 THEN
+    v_rounds = log(2, v_participants)::integer;
+  END CASE;
+
+  FOR i IN 1..(v_rounds) LOOP
+    PERFORM competition_data.create_round(p_phase);
+  END LOOP;
 
   RETURN 0;
 
