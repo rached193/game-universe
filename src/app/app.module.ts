@@ -10,6 +10,7 @@ import { HomepageComponent } from './competition/homepage/homepage.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { LoginComponent } from './login/login.component';
 import { VisualComponent } from './visual/visual.component';
+import { CoreModule } from './core/core.module';
 
 
 @NgModule({
@@ -22,6 +23,7 @@ import { VisualComponent } from './visual/visual.component';
     VisualComponent
   ],
   imports: [
+    CoreModule,
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
