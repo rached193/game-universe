@@ -124,9 +124,24 @@ button.game-button {
     }
   }
 
+  &.sucess{
+    background-color: #28a745;
+  }
+
+  &.cancel{
+    background-color: #dc3545;
+  }
+
   &.game-icon{
     border-radius: 50%;
     font-size: 0;
+
+
+    &.navigation{
+      border-radius: 0.4em;
+      background-color: #FFF;
+      border: #477a93 solid 2px;
+    }
 
     .icon{
       width: 25px;

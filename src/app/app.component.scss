@@ -1,27 +1,6 @@
 /* Header */
 
 
-#header-wrapper
-{
-  background-color: #8A897C;
-  position: relative;
-}
-
-#header-wrapper:before
-{
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(60,50,70,0.5);
-}
-
-#header {
-    position: relative;
-    z-index: 10;
-}
 
 header
 {

@@ -9,7 +9,6 @@ import { CreateCompetitionComponent } from './competition/create.competition/cre
 import { HomepageComponent } from './competition/homepage/homepage.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { LoginComponent } from './login/login.component';
-import { NavbarComponent } from './navbar/navbar.component';
 import { VisualComponent } from './visual/visual.component';
 
 
@@ -20,7 +19,6 @@ import { VisualComponent } from './visual/visual.component';
     HomepageComponent,
     SignInComponent,
     LoginComponent,
-    NavbarComponent,
     VisualComponent
   ],
   imports: [
