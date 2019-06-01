@@ -3,6 +3,8 @@ CREATE OR REPLACE FUNCTION competition_data.get_videogames()
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
+    COST 100
+    VOLATILE
 AS $BODY$
 declare
 	v_result jsonb;
@@ -20,10 +22,12 @@ $BODY$;
 
 /*Get Platforms*/
 CREATE OR REPLACE FUNCTION competition_data.get_platforms(
-  p_videogame integer)
+	p_videogame integer)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
+    COST 100
+    VOLATILE
 AS $BODY$
 declare
 	v_result jsonb;
@@ -46,10 +50,12 @@ $BODY$;
 
 /*Get Regions*/
 CREATE OR REPLACE FUNCTION competition_data.get_regions(
-  p_videogame integer)
+	p_videogame integer)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
+    COST 100
+    VOLATILE
 AS $BODY$
 declare
 	v_result jsonb;
@@ -68,10 +74,12 @@ $BODY$;
 
 /*Get GameModes*/
 CREATE OR REPLACE FUNCTION competition_data.get_gamemodes(
-  p_videogame integer)
+	p_videogame integer)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
+    COST 100
+    VOLATILE
 AS $BODY$
 declare
 	v_result jsonb;
@@ -90,10 +98,12 @@ $BODY$;
 
 /*Get Competition Filters*/
 CREATE OR REPLACE FUNCTION competition_data.get_competition_filters(
-  p_videogame integer)
+	p_videogame integer)
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
+    COST 100
+    VOLATILE
 AS $BODY$
 declare
 	v_result jsonb;
@@ -141,7 +151,11 @@ CREATE OR REPLACE FUNCTION competition_data.create_competition(
 	p_videogame integer,
 	p_platform integer,
 	p_region integer,
-	p_gamemode integer)
+	p_game_mode integer,
+	p_registration_date date,
+	p_competition_date date,
+	p_weak_cap integer,
+	p_hard_cap integer)
     RETURNS integer
     LANGUAGE 'plpgsql'
 
@@ -150,18 +164,21 @@ CREATE OR REPLACE FUNCTION competition_data.create_competition(
 AS $BODY$
 declare
 	v_id integer;
+  v_log text;
 BEGIN
-   SELECT nextval('competition_data.COMPETITION_SEQ') into v_id;
+  select nextval('competition_data.competition_seq') into v_id;
 
-   INSERT INTO competition_data.COMPETITION (ID, ORGANIZATION, NAME, VIDEOGAME, PLATFORM, REGION, GAMEMODE, ENABLED) VALUES
-   (v_id, p_organization, p_name, p_videogame, p_platform, p_region, p_gamemode, 'false');
+  insert into competition_data.competition (id, organization, name, videogame, platform, region, game_mode, registration_date, competition_date, weak_cap, hard_cap) VALUES
+    (v_id, p_organization, p_name, p_videogame, p_platform, p_region, p_game_mode, p_registration_date, p_competition_date, p_weak_cap, p_hard_cap);
 
-   RETURN v_id;
+  RETURN v_id;
 
-   EXCEPTION
-   WHEN OTHERS THEN
-   RETURN -1;
-END;
+  EXCEPTION
+  WHEN OTHERS THEN
+    v_log = 'Error on function create_competition: '||SQLERRM;
+    PERFORM log_data.create_log(v_log);
+    RETURN -1;
+  END;
 $BODY$;
 
 /*Enable Competition*/

@@ -28,7 +28,7 @@ CREATE TABLE master_data.REGION (
 );
 
 /*GameMode*/
-CREATE TABLE master_data.GAMEMODE (
+CREATE TABLE master_data.GAME_MODE (
 	ID INTEGER,
 	VIDEOGAME INTEGER NOT NULL,
 	NAME character varying(50) NOT NULL,

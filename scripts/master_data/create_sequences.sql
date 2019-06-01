@@ -8,7 +8,7 @@ CREATE SEQUENCE master_data.PLATFORM_SEQ;
 CREATE SEQUENCE master_data.REGION_SEQ;
 
 /*GameMode*/
-CREATE SEQUENCE master_data.GAMEMODE_SEQ;
+CREATE SEQUENCE master_data.GAME_MODE_SEQ;
 
 /*Format*/
 CREATE SEQUENCE master_data.FORMAT_SEQ;
