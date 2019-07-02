@@ -1,11 +1,15 @@
 /*Master Data*/
 CREATE SCHEMA master_data
-AUTHORIZATION ebiypfwrqgauhd;
+AUTHORIZATION xbbhrkvssfuetu;
 
 /*User Data*/
 CREATE SCHEMA user_data
-AUTHORIZATION ebiypfwrqgauhd;
+AUTHORIZATION xbbhrkvssfuetu;
 
 /*Competition Data*/
 CREATE SCHEMA competition_data
-AUTHORIZATION ebiypfwrqgauhd;
+AUTHORIZATION xbbhrkvssfuetu;
+
+/*Log Data*/
+CREATE SCHEMA log_data
+AUTHORIZATION xbbhrkvssfuetu;

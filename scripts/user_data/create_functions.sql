@@ -17,10 +17,13 @@ BEGIN
    INSERT INTO user_data.ACCOUNT (ID, LOGIN, PASSWORD, NAME, ENABLED) VALUES
    (v_id, p_login, p_password, p_name, 'true');
 
+   PERFORM log_data.create_log('Account created');
+
    RETURN v_id;
 
    EXCEPTION
    WHEN OTHERS THEN
+    PERFORM log_data.create_log('Error on function: user_data.create_account');
    RETURN -1;
 END;
 $BODY$;
@@ -107,7 +110,11 @@ declare
   v_token text;
   v_count integer;
   v_done boolean = false;
+  v_log text;
 BEGIN
+  v_log = '{ login: '''||p_login||''', passowrd: '''||p_password||'''}';
+  PERFORM log_data.create_log(v_log);
+
   SELECT ID, ENABLED into v_account, v_enabled
   FROM user_data.ACCOUNT
   WHERE login = p_login

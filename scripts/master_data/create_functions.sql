@@ -276,8 +276,8 @@ BEGIN
 END;
 $BODY$;
 
-/*Create GameMode*/
-CREATE OR REPLACE FUNCTION master_data.create_gamemode(
+/*Create Game_Mode*/
+CREATE OR REPLACE FUNCTION master_data.create_game_mode(
 	p_videogame integer,
 	p_name text)
     RETURNS integer
@@ -289,9 +289,9 @@ AS $BODY$
 declare
 	v_id integer;
 BEGIN
-   SELECT nextval('master_data.GAMEMODE_SEQ') into v_id;
+   SELECT nextval('master_data.GAME_MODE_SEQ') into v_id;
 
-   INSERT INTO master_data.GAMEMODE (ID, VIDEOGAME, NAME, ENABLED) VALUES
+   INSERT INTO master_data.GAME_MODE (ID, VIDEOGAME, NAME, ENABLED) VALUES
    (v_id, p_videogame, p_name, 'false');
 
    RETURN v_id;
@@ -302,8 +302,8 @@ BEGIN
 END;
 $BODY$;
 
-/*Enable GameMode*/
-CREATE OR REPLACE FUNCTION master_data.enable_gamemode(
+/*Enable Game Mode*/
+CREATE OR REPLACE FUNCTION master_data.enable_game_mode(
 	p_id integer,
 	p_enabled boolean)
     RETURNS integer
@@ -313,7 +313,7 @@ CREATE OR REPLACE FUNCTION master_data.enable_gamemode(
     VOLATILE
 AS $BODY$
 BEGIN
-   UPDATE master_data.GAMEMODE
+   UPDATE master_data.GAME_MODE
    SET ENABLED = p_enabled
    WHERE ID = p_id;
 
@@ -325,8 +325,8 @@ BEGIN
 END;
 $BODY$;
 
-/*Edit GameMode*/
-CREATE OR REPLACE FUNCTION master_data.edit_gamemode(
+/*Edit Game Mode*/
+CREATE OR REPLACE FUNCTION master_data.edit_game_mode(
 	p_id integer,
 	p_name text)
     RETURNS integer
@@ -336,7 +336,7 @@ CREATE OR REPLACE FUNCTION master_data.edit_gamemode(
     VOLATILE
 AS $BODY$
 BEGIN
-   UPDATE master_data.GAMEMODE
+   UPDATE master_data.GAME_MODE
    SET name = p_name
    WHERE ID = p_id;
 
@@ -348,8 +348,8 @@ BEGIN
 END;
 $BODY$;
 
-/*Get GameModes*/
-CREATE OR REPLACE FUNCTION master_data.get_gamemodes()
+/*Get Game Modes*/
+CREATE OR REPLACE FUNCTION master_data.get_game_modes()
     RETURNS jsonb
     LANGUAGE 'plpgsql'
 
@@ -365,7 +365,7 @@ BEGIN
 			'name', v.name),
 		'enabled', g.enabled
 	)) into v_result
-	FROM master_data.gamemode g
+	FROM master_data.game_mode g
 	JOIN master_data.videogame v ON g.videogame = v.id;
 
    RETURN v_result;
