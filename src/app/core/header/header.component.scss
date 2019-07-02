@@ -1,23 +1,25 @@
 :host{
-    margin-bottom: 3em;
-    position: relative;
+    background-color: var(--primary-color-4);
+    padding: 15px;
+}
 
-    .header-wrapper{
-        display:inline-flex;
-        background-color: #474849;
-        width: 100%;
 
-        .banner{
-            overflow: hidden;
-            text-align: center;
-            z-index: 1;
-            position: relative;
-            font-size: 3em;
 
-            .byline{
-                padding: 0em 5em;
-                font-size: 1.50em;
-            }
-        }
+.header-wrapper{
+    display: inline-flex;
+
+    width: 100%;
+
+
+    .logo h1 a{
+        color: white;
+        text-decoration: none;
     }
+
+    .banner{
+        flex-grow: 1;
+        margin: auto;
+        text-align: center;
+    }
+
 }
