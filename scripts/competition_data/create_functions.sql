@@ -176,7 +176,7 @@ BEGIN
   EXCEPTION
   WHEN OTHERS THEN
     v_log = 'Error on function create_competition: '||SQLERRM;
-    PERFORM log_data.create_log(v_log);
+    PERFORM log_data.create_log('E', v_log);
     RETURN -1;
   END;
 $BODY$;
