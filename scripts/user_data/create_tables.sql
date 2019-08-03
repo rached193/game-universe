@@ -7,7 +7,7 @@ CREATE TABLE user_data.ACCOUNT(
     ENABLED BOOLEAN NOT NULL,
 	  PRIMARY KEY (ID),
 	  UNIQUE (LOGIN),
-    UNIQUE (NAME)
+	  UNIQUE (NAME)
 );
 
 /*Organization*/
