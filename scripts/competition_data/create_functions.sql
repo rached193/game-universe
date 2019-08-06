@@ -72,7 +72,7 @@ BEGIN
 END;
 $BODY$;
 
-/*Get GameModes*/
+/*Get Game Modes*/
 CREATE OR REPLACE FUNCTION competition_data.get_game_modes(
 	p_videogame integer)
     RETURNS jsonb
@@ -111,7 +111,7 @@ BEGIN
   SELECT jsonb_build_object(
 	  'platforms', competition_data.get_platforms(p_videogame),
 	  'regions', competition_data.get_regions(p_videogame),
-	  'gamemodes', competition_data.get_gamemodes(p_videogame)
+	  'gamemodes', competition_data.get_game_modes(p_videogame)
   ) into v_result;
 
   RETURN v_result;
@@ -143,6 +143,29 @@ BEGIN
     AND a.enabled);
 
    RETURN v_result;
+END;
+$BODY$;
+
+/*Get Competitions*/
+CREATE OR REPLACE FUNCTION competition_data.get_competitions(
+	p_organization integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', c.id,
+		'name', c.name
+	)) into v_result
+	FROM competition_data.competition c
+	WHERE c.organization = p_organization;
+
+	RETURN v_result;
 END;
 $BODY$;
 
@@ -180,7 +203,7 @@ BEGIN
     v_log = 'Error on function create_competition: '||SQLERRM;
     PERFORM log_data.create_log('E', v_log);
     RETURN -1;
-  END;
+END;
 $BODY$;
 
 /*Edit Competition*/
@@ -219,7 +242,7 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
 $BODY$;
 
 /*Edit Competition Step*/
@@ -242,7 +265,37 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
+$BODY$;
+
+/*Get Registrations*/
+CREATE OR REPLACE FUNCTION competition_data.get_registrations(
+	p_competition integer)
+	RETURNS jsonb
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', r.id,
+		'name', r.name,
+		'account', jsonb_build_object(
+			'id', a.id,
+			'name', a.name
+		),
+		'step', r.step
+	)) into v_result
+	FROM competition_data.registration r
+	LEFT JOIN user_data.account a
+	ON r.account = a.id
+	WHERE r.competition = p_competition;
+	
+	RETURN v_result;
+END;
 $BODY$;
 
 /*Create Registration*/
@@ -269,7 +322,7 @@ BEGIN
   EXCEPTION
   WHEN OTHERS THEN
     RETURN -1;
-  END;
+END;
 $BODY$;
 
 /*Edit Registration*/
@@ -294,7 +347,7 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
 $BODY$;
 
 /*Update Registration Step*/
@@ -317,7 +370,7 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
 $BODY$;
 
 /*Get Formats*/
@@ -361,6 +414,29 @@ BEGIN
 END;
 $BODY$;
 
+/*Get Phases*/
+CREATE OR REPLACE FUNCTION competition_data.get_phases(
+	p_competition integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', p.id,
+		'phase', p.phase
+	)) into v_result
+	FROM competition_data.phase p
+	WHERE p.competition = p_competition;
+
+	RETURN v_result;
+END;
+$BODY$;
+
 /*Create Phase*/
 CREATE OR REPLACE FUNCTION competition_data.create_phase(
 	p_competition integer,
@@ -387,7 +463,7 @@ BEGIN
   EXCEPTION
   WHEN OTHERS THEN
     RETURN -1;
-  END;
+END;
 $BODY$;
 
 /*Edit Phase*/
@@ -414,7 +490,7 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
 $BODY$;
 
 /*Update Phase Step*/
@@ -437,7 +513,61 @@ BEGIN
   EXCEPTION
   when others THEN
     return -1;
-  end;
+END;
+$BODY$;
+
+/*Set Competitors*/
+CREATE OR REPLACE FUNCTION competition_data.set_competitors(
+	p_phase integer,
+	p_competitors integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+DECLARE v_result integer;
+BEGIN
+	FOR icompetitor IN 1..p_competitors LOOP
+		v_result = competition_data.create_competitor(p_phase, icompetitor, null);
+	END LOOP;
+	
+	return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$;
+
+/*Get Competitors*/
+CREATE OR REPLACE FUNCTION competition_data.get_competitors(
+	p_phase integer)
+	RETURNS jsonb
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', c.id,
+		'competitor', c.competitor,
+		'registration', jsonb_build_object(
+			'id', r.id,
+			'name', r.name
+		),
+		'step', c.step
+	)) into v_result
+	FROM competition_data.competitor c
+	LEFT JOIN competition_data.registration r
+	ON c.registration = r.id
+	WHERE c.phase = p_phase;
+	
+	RETURN v_result;
+END;
 $BODY$;
 
 /*Create Competitor*/
@@ -513,6 +643,53 @@ BEGIN
   end;
 $BODY$;
 
+/*Set Brackets*/
+CREATE OR REPLACE FUNCTION competition_data.set_brackets(
+	p_phase integer,
+	p_brackets integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+DECLARE v_result integer;
+BEGIN
+	FOR ibracket IN 1..p_brackets LOOP
+		v_result = competition_data.create_bracket(p_phase, ibracket);
+	END LOOP;
+	
+	return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$;
+
+/*Get Brackets*/
+CREATE OR REPLACE FUNCTION competition_data.get_brackets(
+	p_phase integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', b.id,
+		'bracket', b.bracket
+	)) into v_result
+	FROM competition_data.bracket b
+	WHERE b.phase = p_phase;
+
+	RETURN v_result;
+END;
+$BODY$;
+
 /*Create Bracket*/
 CREATE OR REPLACE FUNCTION competition_data.create_bracket(
 	p_phase integer,
@@ -560,6 +737,60 @@ BEGIN
   when others THEN
     return -1;
   end;
+$BODY$;
+
+/*Set Slots*/
+CREATE OR REPLACE FUNCTION competition_data.set_slots(
+	p_bracket integer,
+	p_slots integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+DECLARE v_result integer;
+BEGIN
+	FOR islot IN 1..p_slots LOOP
+		v_result = competition_data.create_slot(p_bracket, islot, null);
+	END LOOP;
+	
+	return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$;
+
+/*Get Slots*/
+CREATE OR REPLACE FUNCTION competition_data.get_slots(
+	p_bracket integer)
+	RETURNS jsonb
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', s.id,
+		'slot', s.competitor,
+		'competitor', jsonb_build_object(
+			'id', c.id,
+			'competitor', c.competitor
+		),
+		'step', s.step
+	)) into v_result
+	FROM competition_data.slot s
+	LEFT JOIN competition_data.competitor c
+	ON s.competitor = c.id
+	WHERE s.bracket = p_bracket;
+	
+	RETURN v_result;
+END;
 $BODY$;
 
 /*Create Slot*/
@@ -635,6 +866,74 @@ BEGIN
   end;
 $BODY$;
 
+/*Set Rounds*/
+CREATE OR REPLACE FUNCTION competition_data.set_rounds(
+	p_bracket integer,
+	p_rounds integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_format integer;
+	v_date date;
+	v_slots integer;
+	v_rounds integer;
+	v_result integer;
+BEGIN
+	SELECT p.format, p.phase_date into v_format, v_date
+	FROM competition_data.phase p
+	JOIN competition_data.bracket b
+	ON p.id = b.phase
+	WHERE b.id = p_bracket;
+	
+	SELECT count(1) into v_slots
+	FROM competition_data.slot s
+	WHERE s.bracket = p_bracket;
+	
+	CASE v_format
+		WHEN 1 THEN v_rounds = (v_slots-1)*p_rounds;
+		WHEN 2, 3 THEN v_rounds = log(2, v_slots)::integer;
+		ELSE v_rounds = 0;
+	END CASE;
+	
+	FOR iround IN 1..v_rounds LOOP
+		v_result = competition_data.create_round(p_bracket, iround, v_date);
+	END LOOP;
+	
+	RETURN 0;
+	
+	EXCEPTION
+  	when others THEN
+    	return -1;
+END;
+$BODY$;
+
+/*Get Rounds*/
+CREATE OR REPLACE FUNCTION competition_data.get_rounds(
+	p_bracket integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', r.id,
+		'round', r.round
+	)) into v_result
+	FROM competition_data.round r
+	WHERE r.bracket = p_bracket;
+
+	RETURN v_result;
+END;
+$BODY$;
+
 /*Create Round*/
 CREATE OR REPLACE FUNCTION competition_data.create_round(
 	p_bracket integer,
@@ -706,6 +1005,80 @@ BEGIN
   when others THEN
     return -1;
   end;
+$BODY$;
+
+/*Set Matches*/
+CREATE OR REPLACE FUNCTION competition_data.set_matches(
+	p_round integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_format integer;
+	v_slots integer;
+	v_round integer;
+	v_date date;
+	v_matches integer;
+	v_result integer;
+BEGIN
+	SELECT p.format, r.round, r.round_date into v_format, v_round, v_date
+	FROM competition_data.phase p
+	JOIN competition_data.bracket b
+	ON p.id = b.phase
+	JOIN competition_data.round r
+	ON b.id = r.bracket
+	WHERE r.id = p_round;
+	
+	SELECT count(1) into v_slots
+	FROM competition_data.slot s
+	JOIN competition_data.bracket b
+	ON s.bracket = b.id
+	JOIN competition_data.round r
+	ON b.id = r.bracket
+	WHERE r.id = p_round;
+	
+	CASE v_format
+		WHEN 1, 2 THEN v_matches = v_slots/2;
+		WHEN 3 THEN v_matches = v_slots/(2^v_round);
+		ELSE v_matches = 0;
+	END CASE;
+	
+	FOR imatch IN 1..v_matches LOOP
+		v_result = competition_data.create_match(p_round, imatch, v_date);
+	END LOOP;
+	
+	RETURN 0;
+	
+	EXCEPTION
+  	when others THEN
+    	return -1;
+END;
+$BODY$;
+
+/*Get Matches*/
+CREATE OR REPLACE FUNCTION competition_data.get_matches(
+	p_round integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', m.id,
+		'match', m.match
+	)) into v_result
+	FROM competition_data.match m
+	WHERE m.round = p_round;
+
+	RETURN v_result;
+END;
 $BODY$;
 
 /*Create Match*/
@@ -781,6 +1154,59 @@ BEGIN
   end;
 $BODY$;
 
+/*Set Rivals*/
+CREATE OR REPLACE FUNCTION competition_data.set_rivals(
+	p_match integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+DECLARE v_result integer;
+BEGIN
+	FOR irival IN 1..2 LOOP
+		v_result = competition_data.create_rival(p_match, irival, null);
+	END LOOP;
+	
+	return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$;
+
+/*Get Rivals*/
+CREATE OR REPLACE FUNCTION competition_data.get_rivals(
+	p_match integer)
+	RETURNS jsonb
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', r.id,
+		'rival', r.rival,
+		'slot', jsonb_build_object(
+			'id', s.id,
+			'slot', s.slot
+		),
+		'step', r.step
+	)) into v_result
+	FROM competition_data.rival r
+	LEFT JOIN competition_data.slot s
+	ON r.slot = s.id
+	WHERE r.match = p_match;
+	
+	RETURN v_result;
+END;
+$BODY$;
+
 /*Create Rival*/
 CREATE OR REPLACE FUNCTION competition_data.create_rival(
 	p_match integer,
@@ -852,6 +1278,67 @@ BEGIN
   when others THEN
     return -1;
   end;
+$BODY$;
+
+/*Set Games*/
+CREATE OR REPLACE FUNCTION competition_data.set_games(
+	p_match integer)
+	RETURNS integer
+	LANGUAGE 'plpgsql'
+	
+	COST 100
+	VOLATILE
+AS $BODY$
+DECLARE
+	v_games integer;
+	v_date date;
+	v_result integer;
+BEGIN
+	SELECT bo.games, m.match_date into v_games, v_date
+	FROM master_data.bo bo
+	JOIN competition_data.phase p
+	ON bo.id = p.bo
+	JOIN competition_data.bracket b
+	ON p.id = b.phase
+	JOIN competition_data.round r
+	ON b.id = r.bracket
+	JOIN competition_data.match m
+	ON r.id = m.round
+	WHERE m.id = p_match;
+	
+	FOR igame IN 1..v_games LOOP
+		v_result = competition_data.create_game(p_match, igame, v_date);
+	END LOOP;
+	
+	return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$;
+
+/*Get Games*/
+CREATE OR REPLACE FUNCTION competition_data.get_games(
+	p_match integer)
+    RETURNS jsonb
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+declare
+	v_result jsonb;
+BEGIN
+	SELECT jsonb_agg(jsonb_build_object(
+		'id', g.id,
+		'game', g.game
+	)) into v_result
+	FROM competition_data.game g
+	WHERE g.match = p_match;
+
+	RETURN v_result;
+END;
 $BODY$;
 
 /*Create Game*/
