@@ -894,8 +894,8 @@ BEGIN
 	WHERE s.bracket = p_bracket;
 	
 	CASE v_format
-		WHEN 1 THEN v_rounds = (v_slots-1)*p_rounds;
-		WHEN 2, 3 THEN v_rounds = log(2, v_slots)::integer;
+		WHEN 1 THEN v_rounds = (v_slots+v_slots%2-1)*p_rounds;
+		WHEN 2, 3 THEN v_rounds = ceiling(log(2, v_slots));
 		ELSE v_rounds = 0;
 	END CASE;
 	
@@ -1042,7 +1042,7 @@ BEGIN
 	
 	CASE v_format
 		WHEN 1, 2 THEN v_matches = v_slots/2;
-		WHEN 3 THEN v_matches = v_slots/(2^v_round);
+		WHEN 3 THEN v_matches = (power(2,ceiling(log(2, v_slots))::integer)/(2^v_round))-(CASE WHEN v_round = 1 THEN (power(2,ceiling(log(2, v_slots))::integer)-v_slots) ELSE 0 END);
 		ELSE v_matches = 0;
 	END CASE;
 	
@@ -1436,3 +1436,165 @@ BEGIN
     return -1;
   end;
 $BODY$;
+
+/*Set League Matches*/
+CREATE OR REPLACE FUNCTION competition_data.edit_winner(
+	p_id integer,
+	p_winner integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+BEGIN
+  update competition_data.game set
+    winner = p_winner
+  where id = p_id;
+
+  return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+  end;
+$BODY$;
+
+/*Set League Pairings*/
+CREATE OR REPLACE FUNCTION competition_data.set_league_pairings(
+  p_bracket integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+DECLARE
+	v_rounds integer;
+  v_reps integer;
+  v_slots integer;
+  v_slot integer[];
+  v_matches integer;
+  v_rival integer[];
+  v_order integer[];
+  v_order_inverso integer[];
+  v_aux1 integer[];
+  v_aux2 integer[];
+  v_aux3 integer[];
+  v_aux integer;
+
+  v_result integer;
+BEGIN
+  SELECT count(1) into v_slots
+  FROM competition_data.slot s
+  WHERE s.bracket = p_bracket;
+  --raise notice 'Slots: %', v_slots;
+
+  SELECT array_agg(id) into v_slot
+  FROM competition_data.slot s
+  WHERE s.bracket = p_bracket;
+  --raise notice 'Slot Array: %', v_slot;
+
+  SELECT array_agg(id ORDER BY rival, round, match) into v_rival
+  FROM (SELECT rr.id, rr.rival, r.round, m.match
+  FROM competition_data.round r
+  JOIN competition_data.match m
+  ON r.id = m.round
+  JOIN competition_data.rival rr
+  ON m.id = rr.match
+  WHERE r.bracket = p_bracket
+  UNION ALL
+  SELECT null, 1, r.round, 0
+  FROM competition_data.round r
+  WHERE r.bracket = p_bracket
+  AND v_slots%2 = 1
+  UNION ALL
+  SELECT null, 2, r.round, 0
+  FROM competition_data.round r
+  WHERE r.bracket = p_bracket
+  AND v_slots%2 = 1) sq;
+  --raise notice 'Rival Ids: %', v_rival;
+
+  v_matches = v_slots/2;
+  --raise notice 'Matches: %', v_matches;
+
+  v_rounds = (v_slots+v_slots%2-1);
+  --raise notice 'Rounds: %', v_rounds;
+  SELECT count(1)/v_rounds into v_reps
+  FROM competition_data.round r
+  WHERE r.bracket = p_bracket;
+  --raise notice 'Reps: %', v_reps;
+
+  FOR islot IN 1..(v_slots-1+(v_slots%2)) LOOP
+    v_aux = floor(random()* ((v_slots-(islot-1))-(1) + 1) + (1));
+    --raise notice 'Aux: %', v_aux;
+    v_order = array_append(v_order, v_slot[v_aux]);
+    --raise notice 'Order Array: %', v_order;
+    v_order_inverso[v_slots+(v_slots%2)-islot] = v_slot[v_aux];
+    --raise notice 'Order Inverso Array: %', v_order_inverso;
+    v_slot = array_remove(v_slot, v_slot[v_aux]);
+    --raise notice 'Left Slots: %', v_slot;
+  END LOOP;
+
+  FOR imatch IN 1..v_matches+(v_slots%2) LOOP
+    v_aux1 = array_cat(v_aux1, v_order);
+    IF imatch < v_matches+(v_slots%2)
+      THEN v_aux3 = array_cat(v_aux3, v_order_inverso);
+    END IF;
+  END LOOP;
+  --raise notice 'Aux1 Slots: %', v_aux1;
+  --raise notice 'Aux3 Slots: %', v_aux3;
+
+  FOR iround IN 1..v_rounds LOOP
+    FOR imatch IN 1.. v_matches+(v_slots%2) LOOP
+      IF imatch = 1
+        THEN v_aux2 = array_append(v_aux2, v_slot[1]);
+        ELSE v_aux2 = array_append(v_aux2, v_aux3[(imatch-1)+(v_matches+(v_slots%2)-1)*(iround-1)]);
+      END IF;
+    END LOOP;
+  END LOOP;
+  --raise notice 'Aux2 Slots: %', v_aux2;
+
+  raise notice 'Rival Ids: %', v_rival;
+  raise notice 'Aux1 Slots: %', v_aux1;
+  raise notice 'Aux2 Slots: %', v_aux2;
+
+  FOR irep IN 1..v_reps LOOP
+    raise notice 'Iteracion: %', irep;
+    FOR iround IN 1..v_rounds LOOP
+      FOR imatch IN 1..v_matches+(v_slots%2) LOOP
+        IF (imatch = 1 AND iround%2 = 0)
+          THEN
+            IF irep%2 = 1
+              THEN
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Local %, id %', iround, imatch, v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Visitor %2, id %', iround, imatch, v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+              ELSE
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Local %, id %', iround, imatch, v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Visitor %, id %', iround, imatch, v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+            END IF;
+          ELSE
+            IF irep%2 = 1
+              THEN
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Local %, id %', iround, imatch, v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Visitor %, id %', iround, imatch, v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+              ELSE
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Local %, id %', iround, imatch, v_aux2[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+                v_result = competition_data.edit_rival(v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)], v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)]);
+                raise notice 'Round %, Match %, Visitor %, id %', iround, imatch, v_aux1[imatch+(v_matches+(v_slots%2))*(iround-1)], v_rival[imatch+(v_matches+(v_slots%2))*(iround-1)+v_rounds*(v_matches+(v_slots%2))*v_reps+v_rounds*(v_matches+(v_slots%2))*(irep-1)];
+            END IF;
+        END IF;
+      END LOOP;
+    END LOOP;
+  END LOOP;
+
+  return 0;
+END;
+$BODY$
