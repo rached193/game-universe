@@ -106,5 +106,8 @@ SELECT competition_data.update_game_step(p_id, p_step) as data;
 
 SELECT competition_data.edit_winner(p_id, p_winner) as data;
 
+/*Assign Slots*/
+SELECT competition_data.assign_slots(p_phase) as data;
+
 /*Set Pairings*/
 SELECT competition_data.set_league_pairings(p_bracket) as data;

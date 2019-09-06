@@ -777,7 +777,7 @@ declare
 BEGIN
 	SELECT jsonb_agg(jsonb_build_object(
 		'id', s.id,
-		'slot', s.competitor,
+		'slot', s.slot,
 		'competitor', jsonb_build_object(
 			'id', c.id,
 			'competitor', c.competitor
@@ -1460,6 +1460,56 @@ BEGIN
   end;
 $BODY$;
 
+/*Assign Slots*/
+CREATE OR REPLACE FUNCTION competition_data.assign_slots(
+  p_phase integer)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    
+    COST 100
+    VOLATILE
+AS $BODY$
+DECLARE
+  v_competitors integer;
+  v_competitor integer[];
+  v_slot integer[];
+  v_aux integer;
+
+  v_result integer;
+BEGIN
+  SELECT count(1) into v_competitors
+  FROM competition_data.competitor c
+  WHERE c.phase = p_phase;
+  raise notice 'Competitors: %', v_competitors;
+
+  SELECT array_agg(c.id) into v_competitor
+  FROM competition_data.competitor c
+  WHERE c.phase = p_phase;
+  raise notice 'Competitors Array: %', v_competitor;
+
+  SELECT array_agg(s.id) into v_slot
+  FROM competition_data.slot s
+  JOIN competition_data.bracket b
+  ON s.bracket = b.id
+  WHERE b.phase = p_phase;
+  raise notice 'Slots Array: %', v_slot;
+
+  FOR icompetitor IN 1..v_competitors LOOP
+    v_aux = floor(random()* ((v_competitors-(icompetitor-1))-(1) + 1) + (1));
+    raise notice 'Aux: %', v_aux;
+    v_result = competition_data.edit_slot(v_slot[v_aux], v_competitor[icompetitor]);
+    raise notice 'Competitor: %, Slot: %', v_competitor[icompetitor], v_slot[v_aux];
+    v_slot = array_remove(v_slot, v_slot[v_aux]);
+  END LOOP;
+
+  return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
+END;
+$BODY$
+
 /*Set League Pairings*/
 CREATE OR REPLACE FUNCTION competition_data.set_league_pairings(
   p_bracket integer)
@@ -1596,5 +1646,9 @@ BEGIN
   END LOOP;
 
   return 0;
+
+  EXCEPTION
+  when others THEN
+    return -1;
 END;
 $BODY$
