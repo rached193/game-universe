@@ -11,7 +11,6 @@ import { SignInComponent } from './sign-in/sign-in.component';
 import { LoginComponent } from './login/login.component';
 import { VisualComponent } from './visual/visual.component';
 import { CoreModule } from './core/core.module';
-import { TestDynamicDirective } from './test-dynamic.directive';
 
 
 @NgModule({
@@ -21,8 +20,7 @@ import { TestDynamicDirective } from './test-dynamic.directive';
     HomepageComponent,
     SignInComponent,
     LoginComponent,
-    VisualComponent,
-    TestDynamicDirective
+    VisualComponent
   ],
   imports: [
     CoreModule,
