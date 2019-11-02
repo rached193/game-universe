@@ -11,19 +11,19 @@ CREATE OR REPLACE FUNCTION user_data.create_account(
 AS $BODY$
 declare
 	v_id integer;
+  v_log text;
 BEGIN
    SELECT nextval('user_data.ACCOUNT_SEQ') into v_id;
 
    INSERT INTO user_data.ACCOUNT (ID, LOGIN, PASSWORD, NAME, ENABLED) VALUES
    (v_id, p_login, p_password, p_name, 'true');
 
-   PERFORM log_data.create_log('Account created');
-
    RETURN v_id;
 
    EXCEPTION
    WHEN OTHERS THEN
-    PERFORM log_data.create_log('Error on function: user_data.create_account');
+    v_log = 'Error on function create_account: '||SQLERRM;
+    PERFORM log_data.create_log('E', v_log);
    RETURN -1;
 END;
 $BODY$;
@@ -113,7 +113,6 @@ declare
   v_log text;
 BEGIN
   v_log = '{ login: '''||p_login||''', passowrd: '''||p_password||'''}';
-  PERFORM log_data.create_log(v_log);
 
   SELECT ID, ENABLED into v_account, v_enabled
   FROM user_data.ACCOUNT
